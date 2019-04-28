@@ -1,0 +1,15 @@
+\section{LITERATURE REVIEW}
+Since dynamic modeling was an issue, we dedicated some of our reading to the part of the literature that attempted or talked about the same thing. In \cite{hardt2003dynamic}, they offer something closer to a survey of different methods to model a quadruped. They offer an example of a 2-DOF-legs robot, where they describe the state vector of such systems to have the following variables: 3 Bryant Euler angles for the orientation of the whole system, 3 variables for the position of the system, 3 variables for the linear velocity, 3 for the angular one, and the vectors corresponding to the configurations of all the legs. The control variables can only directly affect the configuration of the joints, and indirectly the others.
+The dynamic model of such a system has the following familiar form
+$$
+\ddot{q} = M(q)^{-1}\big(B\textbf{u} - C(q,\dot{q}) - G(q) + J_c(q)^T f_c\big)
+\\
+0 = g_c(q),
+$$
+which is that of a decoupled n-link robot (more than one chain of decoupled joint variables). M is the inertia matrix, B the matrix of friction coefficient of the joints, C is the matrix that corresponds to the Coriolis and centrifugal forces and G is the gravity vector. $J_c$ is the constraint Jacobian that factors into the equation the external ground constraint forces, so that they can be considered as part of the equation. $g_c$ allows us to compute the constraint Jacobian using the equation:
+$$
+J_c = \frac{\partial gc}{\partial q}
+$$
+However, the authors continue the discussion about stability guarantees and algorithms, without dwelling too much on dynamic modeling.
+\\
+The authors in \cite{ferguene2009dynamic} offer a very good intuition and description about what each of the terms in the typical equation of manipulator dynamics are, which helped us formulate many of our next sub-goals for the project.
