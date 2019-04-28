@@ -1,5 +1,8 @@
 # GITIGNORE
 
+# VSCode Files
+*.code-workspace
+
 # LATEX Build Files
 *.aux
 *.bbl
