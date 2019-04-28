@@ -1,0 +1,31 @@
+\begin{thebibliography}{1}
+
+\bibitem{ferguene2009dynamic}
+Farid Ferguene and Redouane Toumi.
+\newblock Dynamic external force feedback loop control of a robot manipulator
+  using a neural compensator—application to the trajectory following in an
+  unknown environment.
+\newblock {\em International Journal of Applied Mathematics and Computer
+  Science}, 19(1):113--126, 2009.
+
+\bibitem{hardt2003dynamic}
+Michael Hardt and Oskar von Stryk.
+\newblock Dynamic modeling in the simulation, optimization, and control of
+  bipedal and quadrupedal robots.
+\newblock {\em ZAMM-Journal of Applied Mathematics and Mechanics/Zeitschrift
+  f{\"u}r Angewandte Mathematik und Mechanik: Applied Mathematics and
+  Mechanics}, 83(10):648--662, 2003.
+
+\bibitem{kimura2007adaptive}
+Hiroshi Kimura, Yasuhiro Fukuoka, and Avis~H Cohen.
+\newblock Adaptive dynamic walking of a quadruped robot on natural ground based
+  on biological concepts.
+\newblock {\em The International Journal of Robotics Research}, 26(5):475--490,
+  2007.
+
+\bibitem{spong2006robot}
+Mark~W Spong, Seth Hutchinson, Mathukumalli Vidyasagar, et~al.
+\newblock {\em Robot modeling and control}.
+\newblock 2006.
+
+\end{thebibliography}

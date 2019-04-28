@@ -5,7 +5,7 @@
 
 # LATEX Build Files
 *.aux
-*.bbl
+*.blg
 *.fdb_latexmk
 *.fls
 *.log
