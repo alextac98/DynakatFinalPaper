@@ -15,7 +15,7 @@ However, the authors continue the discussion about stability guarantees and algo
 \\
 The authors in \cite{ferguene2009dynamic} offer a very good intuition and description about what each of the terms in the typical equation of manipulator dynamics are, which helped us formulate many of our next sub-goals for the project.
 
-\subsection{FABRIK: An Iterative Solution to Inverse Kinematics}
+\subsection{FABRIK: An Iterative Solution to Inverse Kinematics} \label{sec:fabrik}
 FABRIK, or Forward and Backward Reaching Inverse Kinematics, is an iterative solution to solving an inverse kinematics problem. Most analytical inverse kinematic methods are complex to compute, especially when there are more and more degrees of freedom. In fact, in some cases, it may be impossible to geometrically or algebraically find the inverse kinematic equations for a robot. These methods are often slow to execute, and are susceptible to singularities. Iterative methods approximate an inverse kinematic solution, which lead to faster compute times and less stress on the computer running the algorithm. Although iterative solutions like FABRIK will never give an exact answer, it approaches the best answer faster than other iterative algorithms, as seen in Figure \ref{fig:IterativeComparisons}
 \begin{figure}[thbp]
     \centering
