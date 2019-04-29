@@ -111,4 +111,12 @@ $$
     M(q) \ddot{q} + C(q, \dot{q}) \dot{q} + G = \tau
 $$
 
-Implementation wise, the M, C and G matrices were computed in a file called generatingDynamics.m, which initializes the parameters like weights and inertia tensors and then calls another function which returns the Jacobians for the chosen center of mass, in addition to the rotation that aligns the corresponding inertia matrix and $r_{c_i}$ vectors (the vector that indicates the location of the center of mass of the $i^{th}$ link with respect to the base). Once the matrices are computed, they are turned from symbolic matrices, which are very slow to evaluate, into matlab functions using the matlabFunction routine which is part of the symbolic toolbox. The result is a set of functions, computeM, computeC and computeG which combined run at an average of 25 milliseconds, which is good enough for simulation. Figure \ref{fig:dhframes} also shows the frame in which the dynamic model is shown. Note that in this frame, the gravity can sometimes be in another orientation than the negative $z_world$ vector.
+Implementation-wise, the M, C and G matrices were computed in a file called generatingDynamics.m, which initializes the parameters like weights and inertia tensors and then calls another function which returns the Jacobians for the chosen center of mass, in addition to the rotation that aligns the corresponding inertia matrix and $r_{c_i}$ vectors (the vector that indicates the location of the center of mass of the $i^{th}$ link with respect to the base). Once the matrices are computed, they are turned from symbolic matrices, which are very slow to evaluate, into matlab functions using the matlabFunction routine which is part of the symbolic toolbox. The result is a set of functions, computeM, computeC and computeG which combined run at an average of 25 milliseconds, which is good enough for simulation. Figure \ref{fig:dhframes} also shows the frame in which the dynamic model is shown. Note that in this frame, the gravity can sometimes be in another orientation than the negative $z_world$ vector.
+
+Since we didn't have control over how SimuLink loads the models, we had to do some calibration when designing the controllers that use the model internally. For example, the measured q and \dot{q} sometimes had to be negated. Also, the q values needed some calibration so that the home configuration is as shown in figure \ref{fig:dhframes}. Figure \ref{fig:calibration} shows the setup that was explained.
+
+\begin{figure}[thpb]
+    \parbox{\linewidth}{\includegraphics[width=\linewidth]{Figures/controller_calibration.png}}
+    \caption{A blown-up SimuLink schematic of a controller for a leg.}
+    \label{fig:calibration}
+\end{figure}
