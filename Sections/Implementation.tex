@@ -74,63 +74,36 @@ At first we had decided to calculate the inverse kinematics using a geometric ap
 The Jacobian of an individual leg is the single most important aspect in the process of dynamically modeling the quadruped in question. In fact, we need to be able to compute more than one Jacobian for each configuration, one for each link in the manipulator/leg.
 For this purpose, we referred to the book "Robot Modeling and Control" \cite{spong2006robot}, which gives a cookbook method of computing the Jacobian for a point along one of the links of an n-link manipulator. Based on that, we created a function that takes the index of the joint and returns a corresponding 6x4 Jacobian matrix. For the purpose of dynamically modeling the robot, we do not need the matrix to be square. However, for the purpose of task-space trajectory tracking we need the pseudo-inverse.
 
-\subsection{Dynamic Modeling}
-From the process of dynamically modeling the robot, we computed the Lagrangian, as well as the inertia matrix and the potential energy matrix.
-Thus far, we have a MATLAB script that outputs the inertia matrix and the potential energy vector of a specific configuration, what remains to be done is making the set of equations symbolic and doing the differentiations that the Euler Lagrange method requires.
-However, we are expecting to get a slower version of the current code, which currently runs at 9 milliseconds (very good for control), because the symbolic library in MATLAB is known to be slow when used to compute the actual values through substitution. However, we still have to validate whether it does that or not.
-After we do the differentiation, we get the equations of motion that should allow us to figure out the torques required to fight off gravity, for example.
-\subsubsection{The System's Lagrangian}
-We referred to \cite{spong2006robot} for the process of computing the total energy of the system, kinetic and potential. This allowed us to use the Euler-Lagrangian equations of motion that are essential to perform gravity compensation and other dynamic terms cancellation that are needed when we use computed torque control, as a way to control the robot and have it follow trajectories.
-We were able to compute or acquire the matrices that define the following, so called inertia matrix, as defined in \cite{spong2006robot}.
+\subsection{The Dynamics}
+In order to control the robot using torque, we need to provide a signal that takes into account the dynamics of the system, hence the need for a dynamical model. To acquire one, we followed the cookbook method shown in the "Robot Modeling and Control" \cite{spong2006robot} and \cite{murray2017mathematical}. We used the first resource to get the general equations and the second to resolve some ambiguity about whether the \textbf{Inertia Tensors} used in the equations were defined with respect to the center of the link or its hinge point. Both resources are complementary and discuss examples that highlight different nuances.
+From \cite{spong2006robot}, we got the general equation of the Inertia Matrix:
 $$
-M(q) = \sum_{i=1}^n \{m_i J_{vi}(q)^T J_{vi}(q) + J_{\omega i}(q)^T R_i(q) I_i R_i(q) J_{\omega i}(q)\}
+M(q) = \sum_{i=1}^n \{m_i J_{vi}(q)^T J_{vi}(q) + J_{\omega i}(q)^T R_i(q) I_i R_i(q)^T J_{\omega i}(q)\},
 $$
-The total kinetic energy of the system can be computed using the following equation:
+where i is in the index of the center of mass of the $i^{th}$ link, $J_{vi}$ the linear velocity part of the Jacobian, and  $J_{\omega i}$ the rotational part of it for the center of mass of the $i^{th}$ link. In the rotational part of the equation, $I_i$ is the constant inertia tensor defined with respect to the $i^{th}$ link, and $R_i$ the rotation matrix that aligns the inertia tensor to the link with respect to the base-frame. $R_i(q) I_i R_i(q)^T$ is thus the inertia tensor of the $i^{th}$ link with respect to the base frame, which is a function of q.
+We acquired the inertia tensors from the SolidWorks model of the leg that we had designed and the rotation was computed by combining the rotation that transforms coordinates from the base to the end of the $i^{th}$ link and another which we designed by hand so that the inertia tensor is aligned with the one represented in SolidWorks. The process was iterative, but we could not validate whether we had the correct configuration until we were able to test it on the model itself.
+The other terms are easy to acquire from the properties of the robot, as well as the Jacobian computations.
+Then, the elements of the Coriolis and Centrifugal forces matrix were computed by using M's elements and the following equation:
 $$
-k = \frac{1}{2} \dot{q}^T M(q)\dot{q}
+c_{kj} = \sum_{i=1}^n \{\frac{\partial d_{kj}}{\partial q_i} + \frac{\partial d_{ki}}{\partial q_j} - \frac{\partial d_{ij}}{\partial q_k} \}\dot{q_i},
 $$
-where i is in the index of the center of mass of the $i^{th}$ link, $J_{vi}$ the linear velocity part of the Jacobian, and  $J_{\omega i}$ the rotational part of it for the center of mass of the $i^{th}$ link.
-The total potential energy in the system is defined as follows.
+where $c_{kj}$ is the intersection of M's $k^{th}$ row and M's $j^{th}$ column.
+Then, to get the symbolic G vector, we get the system's potential energy as follows:
 $$
-P = \sum_{i=1}^n  m_i g^T r_{ci}
+P = \sum_{i=1}^n m_i g^T r_{c_i}
 $$
-where $r_{ci}$ is the location of the center of mass of the $i^{th}$ link and $m_{ci}$ is the mass thereof. g in here is the orientation of the gravity vector. This is what we are planning to change to accommodate the model to different base orientations when the robot is walking.
+where $g^T r_{c_i}$ is the project of the distance to the base-frame of the $i^{th}$ link. We leave the variable g parametric, that is, we let be a symbolic vector and based on the situation in which the arm/leg find itself in, we would then set this g accordingly to counter the effect of gravity on the arm.
+Differentiating this equation with respect to the vector of joint values, we obtain the G vector, which is the gravity vector of a manipulator. The following shows the equation we referred to:
+$$
+g_k = \frac{\partial P}{\partial q_k}
+$$
 
-\section{ENVISIONED APPROACH}
-The process that we envision is the following. After getting the dynamic model of a leg of the robot
+The resulting matrices can be used to express the dynamic model of the robot which goes like this:
 $$
-\tau = M(q)\ddot{q} + C(q,\dot{q})\dot{q} + G(q),
-$$ we can extend that model in two ways.
-First, we either maintain world to leg frame transformation that we update using our measurements (prone to error in the real world), or recompute from scratch the equations and change the gravity vector to reflect the new orientation of the body which we can readily measure using an IMU assumed to be on-board (like proprioception that humans have). We may also parameterize the gravity vector to include those measurements. Independent from this model we may maintain position, and velocity (linear and rotational) variables for the whole system, as prescribed in \cite{hardt2003dynamic}. However, our aim is to make the robot walk a few steps as opposed to being provably stable, so whatever gets us to make the robot walk as a reach goal, we will undergo.
+M(q) \ddot{q} + C(q, \dot{q}) \dot{q} + G = \tau
+$$
 
-\subsection{Trajectories and Controller} \label{sec:trajectories}
-This model will then be used in a computed torque controller to make the leg faithfully follow the trajectories we specify. While MATLAB allows us to do position-based control, we will refrain from using that feature, as this is not the case with real-robots.
-
-As for trajectory generation, we will generate these in the task-space as opposed to the joint-space. For that, we do not need any inverse kinematics, only inverse velocity kinematics. From the reference book \cite{spong2006robot}, we can represent the trajectory-to-follow in the task-space and get its equivalent trajectory in the joint-space.
-Given the following equations, we can do the translation.
-$$
-\dot{X} = J_a(q)\dot{q} 
-$$
-$$
-\ddot{X} = J_a(q)\ddot{q} + \dot{J_a}(q)\dot{q}
-$$
-$$
-\ddot{q} = a_q
-$$
-By defining $a_q$ as $J^{-1}\{a_X - \dot{J}\dot{q}\}$, we can can then directly command the acceleration, as can be seen in the resulting equation $\ddot{X} = a_X$. Then, we can track the trajectory using a PD controller with feed-forward like so:
-$$
-a_X = \ddot{X}^d - k_p (X - X^d) - k_d (\dot{X} - \dot{X}^d)
-$$
-Thus, by computing the desired acceleration at the joint level using $a_q = J^{-1}\{a_X - \dot{J}\dot{q}\}$, we can track a trajectory in task-space. In here, the task space is considered with respect to the frame of the leg, as shown in figure \ref{fig:dhframes}.
-
-\subsection{Central Pattern Generator}
-As per the work in \cite{kimura2007adaptive}, we will use the concept of a central pattern generator. Once we have the trajectories, which can be systematically generated or specified manually (engineered), we can create a simple central pattern generator, a higher-level controller that regulates the phase between the trajectories that the legs follows (the same trajectory for all legs), possibly with some minor changes to angle signs.
-
-A simple approach to the central pattern generator would simply regulate the difference between $t_1$, $t_2$, $t_3$, and $t_4$, such that $0 < t_1 < t_2 < t_3 < t_4 < T$ where T is the final time of the trajectory, and each of those time variables corresponds to the progress of the respective leg along its trajectory.
-
-\subsection{Assumptions Taken}
-One important consequence of our modeling approach is that we are treating the weight of the body as a disturbance, by virtue of the choice of modeling each leg independently. This means that we are also assuming that we can measure the forces at the leg that are generated by the weight of the body very accurately and separate it out from the weight of the leg (which we can do since we are modeling it's weight).
-We are also assuming that we can measure the legs configurations in terms of position and velocity.
+Implementation wise, the M, C and G matrices were computed in a file called generatingDynamics.m, which initializes the parameters like weights and inertia tensors and then calls another function which returns the Jacobians for the chosen center of mass, in addition to the rotation that aligns the corresponding inertia matrix and $r_{c_i}$ vectors (the vector that indicates the location of the center of mass of the $i^{th}$ link with respect to the base). Once the matrices are computed, they are turned from symbolic matrices, which are very slow to evaluate, into matlab functions using the matlabFunction routine which is part of the symbolic toolbox. The result is a set of functions, computeM, computeC and computeG which combined run at an average of 25 milliseconds, which is good enough for simulation. Figure \ref{fig:dhframes} also shows the frame in which the dynamic model is shown. Note that in this frame, the gravity can sometimes be in another orientation than the negative $z_world$ vector.
 
 % \section{Hypothesis}
 % As we were thinking of the different ingredients to our rather simple method of making the robot walk, a hypothesis was brewing in our minds. \\
