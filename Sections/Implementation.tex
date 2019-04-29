@@ -111,6 +111,11 @@ $$
 
 Implementation wise, the M, C and G matrices were computed in a file called generatingDynamics.m, which initializes the parameters like weights and inertia tensors and then calls another function which returns the Jacobians for the chosen center of mass, in addition to the rotation that aligns the corresponding inertia matrix and $r_{c_i}$ vectors (the vector that indicates the location of the center of mass of the $i^{th}$ link with respect to the base). Once the matrices are computed, they are turned from symbolic matrices, which are very slow to evaluate, into matlab functions using the matlabFunction routine which is part of the symbolic toolbox. The result is a set of functions, computeM, computeC and computeG which combined run at an average of 25 milliseconds, which is good enough for simulation. Figure \ref{fig:dhframes} also shows the frame in which the dynamic model is shown. Note that in this frame, the gravity can sometimes be in another orientation than the negative $z_world$ vector.
 
+However, these matrices need to receive q and \dot{q} as measurements, and the home configuration of the robot should be that shown in Figure \ref{fig:dhframes}. Thus, we had to do some calibration; we measured the position encoders of the joints in SimuLink when the robot had no input, observed where the reading converged and then subtracted this value from the input-into-the-controller. We also negated some inputs into the controller and their corresponding outputs because for some of the legs, the x-axis points backward, and for others, it points forward. We have to do this step because we could not control how SimuLink places the frames as the robot is being imported.
+
+\subsection{The Controller}
+With the dynamics (M, C, and G matrices) at hand, we can use them to track a trajectory.
+
 % \section{Hypothesis}
 % As we were thinking of the different ingredients to our rather simple method of making the robot walk, a hypothesis was brewing in our minds. \\
 % \textbf{Hypothesis:} The robot, augmented with the above modeling and compensation, will be able to stand, and perform a few steps on a smooth plane before stumbling.
