@@ -1,4 +1,5 @@
 \section{LITERATURE REVIEW}
+\subsection{Dynamics}
 Since dynamic modeling was an issue, we dedicated some of our reading to the part of the literature that attempted or talked about the same thing. In \cite{hardt2003dynamic}, they offer something closer to a survey of different methods to model a quadruped. They offer an example of a 2-DOF-legs robot, where they describe the state vector of such systems to have the following variables: 3 Bryant Euler angles for the orientation of the whole system, 3 variables for the position of the system, 3 variables for the linear velocity, 3 for the angular one, and the vectors corresponding to the configurations of all the legs. The control variables can only directly affect the configuration of the joints, and indirectly the others.
 The dynamic model of such a system has the following familiar form
 $$
@@ -13,3 +14,25 @@ $$
 However, the authors continue the discussion about stability guarantees and algorithms, without dwelling too much on dynamic modeling.
 \\
 The authors in \cite{ferguene2009dynamic} offer a very good intuition and description about what each of the terms in the typical equation of manipulator dynamics are, which helped us formulate many of our next sub-goals for the project.
+
+\subsection{FABRIK: An Iterative Solution to Inverse Kinematics}
+FABRIK, or Forward and Backward Reaching Inverse Kinematics, is an iterative solution to solving an inverse kinematics problem. Most analytical inverse kinematic methods are complex to compute, especially when there are more and more degrees of freedom. In fact, in some cases, it may be impossible to geometrically or algebraically find the inverse kinematic equations for a robot. These methods are often slow to execute, and are susceptible to singularities. Iterative methods approximate an inverse kinematic solution, which lead to faster compute times and less stress on the computer running the algorithm. Although iterative solutions like FABRIK will never give an exact answer, it approaches the best answer faster than other iterative algorithms, as seen in Figure \ref{fig:IterativeComparisons}
+\begin{figure}[thbp]
+    \centering
+    \includegraphics[width=0.485\textwidth]{Figures/FABRIKComparisons}
+    \caption{FABRIK approaches an error of zero faster than other iterative methods \cite{fabrik2011}}
+    \label{fig:IterativeComparisons}
+\end{figure}
+
+FABRIK is relatively simple to implement. It starts from the last link, and adjusts it so the end effector is at the final goal position, and points it toward the joint it should be connected to. Then, the same thing happens to the next link: it moves so one end connects to the last link, and then points toward the joint it should be connected to. This happens all the way up the link from end to the starting joint, and then back again to the end effector to form one iteration, as shown in Figure \ref{fig:FABRIKSteps}. Since computation is based on basic geometry, FABRIK is simple to implement and fast to compute.
+
+\begin{figure}[thbp]
+    \centering
+    \includegraphics[width=0.4\textwidth]{Figures/FABRIK.png}
+    \caption{Steps to Approximate Inverse Kinematics using FABRIK \cite{fabrik2011}}
+    \label{fig:FABRIKSteps}
+\end{figure}
+
+However, the best part of FABRIK is its versatility. It has proven itself to be resistant to singularities, as well as work with multiple end effectors. \cite{fabrik2011}. It also works with joint limits, and can even act as a closed loop controller when implemented correctly. Better yet, there hasn't been a case where FABRIK has shown no weakness, and is faster than all other known methods.
+
+\subsection{Dynamic Walking}
