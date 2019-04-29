@@ -1,5 +1,11 @@
 \section{PROJECT IMPLEMENTATION}
 \subsection{CAD Model Design} \label{sec:CAD Model Design}
+To simplify development of the project, we developed a very simple model of a quadruped in Dassault SolidWorks, as seen in figure \ref{fig:cadmodel}. This model has the 4-DoF legs we want, and allows us to simplify the computation needed to more efficiently develop a 
+
+\subsubsection*{4-DoF Planar Leg Design} \label{sec:legdesign}
+
+\subsubsection*{Importing the Model into Simscape}
+
 When starting the project, we had a model of a quadruped from another project. This quadruped had 4 DoF (degrees of freedom) per leg like we wanted, but it had one major problem: the model complexity made modeling it very difficult. Therefore, our team decided to design a simple model in Dassault Solidworks, then import it into MATLAB Simulink. The latest model can be seen in Figure 1.
 We then ported the model into MATLAB using exporting software offered by  Dassault Solidworks and we used the Simscape Multibody Simulink library in MATLAB to base the simulation of the robot.
 Figure \ref{fig:cadmodel} shows the cad model. The legs are equivalent, but are given this specific pose to project our vision of how we see the cat stand in the future.
